@@ -8,6 +8,7 @@ export const ShipmentListScreen = () => {
   const navigation = useNavigation();
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   const loadShipments = async () => {
     const data = await getShipments();
@@ -30,14 +31,19 @@ export const ShipmentListScreen = () => {
   useEffect(() => {
     loadShipments();
 
-    // Set up network listener for auto-sync
+    // Set up network listener for auto-sync and online status
     const unsubscribe = NetInfo.addEventListener(state => {
+      setIsOnline(state.isConnected ?? false);
       if (state.isConnected) {
         syncPendingShipments().then(() => loadShipments());
       }
     });
 
-    // Add focus listener to reload shipments when returning to this screen
+    // Check initial connection status
+    NetInfo.fetch().then(state => {
+      setIsOnline(state.isConnected ?? false);
+    });
+
     const unsubscribeFocus = navigation.addListener('focus', () => {
       loadShipments();
     });
@@ -83,6 +89,10 @@ export const ShipmentListScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.statusBar}>
+        <View style={[styles.statusIndicator, { backgroundColor: isOnline ? '#4CAF50' : '#FF5252' }]} />
+        <Text style={styles.statusText}>{isOnline ? 'Online' : 'Offline'}</Text>
+      </View>
       <FlatList
         data={shipments}
         renderItem={renderItem}
@@ -177,6 +187,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    alignContent:'center',
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
@@ -191,5 +202,26 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  statusBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignSelf:'flex-end',
+    alignItems: 'center',
+    padding: 8,
+    width:'30%',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  statusText: {
+    fontSize: 14,
+    color: '#666',
   },
 }); 
