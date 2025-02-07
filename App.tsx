@@ -4,13 +4,25 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ShipmentListScreen } from './src/screens/ShipmentListScreen';
 import { CreateShipmentScreen } from './src/screens/CreateShipmentScreen';
+import { SplashScreen } from './src/screens/SplashScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+       initialRouteName="Splash"
+       screenOptions={{
+         headerShown: false,
+       }}
+      >
+
+      <Stack.Screen 
+          name="Splash" 
+          component={SplashScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen 
           name="ShipmentList" 
           component={ShipmentListScreen}
